@@ -18,8 +18,9 @@ router.get('/', (req, res) => {
         })
 })
 
-router.get('/:userId' ,(req, res) => {
+router.get('/:userId', (req, res) => {
     User.findById(req.params.userId)
+        .select('-password')
         .then(result => {
             res.status(200).json(result)
         })
@@ -28,6 +29,28 @@ router.get('/:userId' ,(req, res) => {
                 message: "User was not found",
                 error: err
             })
+        })
+})
+
+router.post('/:userId/fav', (req, res) => {
+    User.findById(req.params.userId)
+        .select('-password')
+        .then(result => {
+            console.log(result)
+            let tweetFav = result.favs.find(f => f == req.body.tweetId)
+            if (tweetFav) {
+                result.favs.splice(result.favs.indexOf(req.body.tweetId), 1)
+            } else {
+                result.favs.push(req.body.tweetId)
+            }
+            return result.save()
+        })
+        .then(response => {
+            res.status(200).json({ message: 'Updated user', user: response })
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(500).json({ message: 'Could not update user', err })
         })
 })
 
@@ -49,15 +72,26 @@ router.post('/signup', (req, res) => {
                             email: req.body.email,
                             username: req.body.username,
                             password: hash,
+                            retweetsCount: 0,
                             tweets: 0,
                             following: 0,
-                            followers: 0
+                            followers: 0,
+                            favs: []
                         })
                         user.save()
                             .then(result => {
                                 res.status(201).json({
                                     message: "Created user successfully",
-                                    user: result
+                                    user: {
+                                        username: result.username,
+                                        userId: result._id,
+                                        email: result.email,
+                                        retweetsCount: result.retweetsCount,
+                                        tweets: result.tweets,
+                                        followers: result.followers,
+                                        following: result.following,
+                                        favs: result.favs
+                                    }
                                 })
                             })
                             .catch(err => {
@@ -97,7 +131,8 @@ router.post('/login', (req, res) => {
                             message: "Auth successful",
                             token: token,
                             userId: user.id,
-                            username: user.username
+                            username: user.username,
+                            favs: user.favs
                         })
                     }
                     res.status(401).json({
