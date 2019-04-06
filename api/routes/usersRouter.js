@@ -8,7 +8,6 @@ const User = require('../models/user');
 const validAuth = require('../middleware/validToken');
 
 router.get('/', (req, res) => {
-    console.log('GET')
     User.find()
         .then(result => {
             res.status(200).json(result)
@@ -36,7 +35,6 @@ router.post('/:userId/fav', (req, res) => {
     User.findById(req.params.userId)
         .select('-password')
         .then(result => {
-            console.log(result)
             let tweetFav = result.favs.find(f => f == req.body.tweetId)
             if (tweetFav) {
                 result.favs.splice(result.favs.indexOf(req.body.tweetId), 1)
@@ -49,7 +47,6 @@ router.post('/:userId/fav', (req, res) => {
             res.status(200).json({ message: 'Updated user', user: response })
         })
         .catch(err => {
-            console.log(err)
             res.status(500).json({ message: 'Could not update user', err })
         })
 })
