@@ -7,14 +7,19 @@ const cors = require('cors');
 const usersRouter = require('./api/routes/usersRouter');
 const tweetsRouter = require('./api/routes/tweetsRouter');
 
-mongoose.connect('mongodb://localhost:27017/camada3420', {useNewUrlParser: true})
+mongoose.connect('mongodb+srv://sebastian:cacafea@cluster0-ok6xa.mongodb.net/test?retryWrites=true', {useNewUrlParser: true})
+        .then(() => {
+        console.log("Connected to Database");
+        }).catch((err) => {
+            console.log("Not Connected to Database ERROR! ", err);
+        })
 
 mongoose.Promise = global.Promise
 
 app.use(morgan('dev'))
 app.use('/uploads',express.static('uploads'))
 app.use(express.json())
-app.use(cors())
+app.use(cors({credentials: true, origin: true}))
 
 app.use('/users', usersRouter)
 app.use('/tweets', tweetsRouter)

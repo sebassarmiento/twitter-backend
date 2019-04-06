@@ -107,6 +107,7 @@ router.post('/signup', (req, res) => {
 })
 
 router.post('/login', (req, res) => {
+    console.log('Login!')
     User.findOne({ email: req.body.email })
         .then(user => {
             if (user) {
